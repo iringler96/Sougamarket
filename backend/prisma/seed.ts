@@ -1,7 +1,30 @@
-import { PrismaClient, Role, InventoryMovementType, NotificationType, OrderStatus } from '@prisma/client';
+import {
+  PrismaClient,
+  Role,
+  InventoryMovementType,
+  NotificationType,
+  OrderStatus
+} from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
+
+function getEffectivePrice(product: {
+  price: number;
+  offerPrice?: number | null;
+  offerEnabled?: boolean;
+}) {
+  if (
+    product.offerEnabled &&
+    product.offerPrice &&
+    product.offerPrice > 0 &&
+    product.offerPrice < product.price
+  ) {
+    return product.offerPrice;
+  }
+
+  return product.price;
+}
 
 async function main() {
   const adminPassword = await bcrypt.hash('Admin123*', 10);
@@ -32,7 +55,7 @@ async function main() {
     }
   });
 
-  const products = await prisma.product.createMany({
+  await prisma.product.createMany({
     data: [
       {
         name: 'Whisky Black Reserve 750cc',
@@ -41,9 +64,12 @@ async function main() {
         category: 'Alcoholes',
         brand: 'Black Reserve',
         price: 24990,
+        offerPrice: 19990,
+        offerEnabled: true,
         stock: 16,
         lowStockThreshold: 5,
-        imageUrl: 'https://images.unsplash.com/photo-1582819509237-df6b4fffa8af?auto=format&fit=crop&w=800&q=80',
+        imageUrl:
+          'https://images.unsplash.com/photo-1582819509237-df6b4fffa8af?auto=format&fit=crop&w=800&q=80',
         requiresAgeCheck: true
       },
       {
@@ -53,9 +79,27 @@ async function main() {
         category: 'Alcoholes',
         brand: 'Valle Sur',
         price: 8990,
+        offerPrice: 6990,
+        offerEnabled: true,
         stock: 24,
         lowStockThreshold: 6,
-        imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=800&q=80',
+        imageUrl:
+          'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=800&q=80',
+        requiresAgeCheck: true
+      },
+      {
+        name: 'Pisco Transparente 750cc',
+        slug: 'pisco-transparente-750cc',
+        description: 'Pisco tradicional para reuniones y preparaciones.',
+        category: 'Alcoholes',
+        brand: 'Pampa Clara',
+        price: 10990,
+        offerPrice: 9490,
+        offerEnabled: false,
+        stock: 18,
+        lowStockThreshold: 5,
+        imageUrl:
+          'https://images.unsplash.com/photo-1596392301391-684b4f2d4d7f?auto=format&fit=crop&w=800&q=80',
         requiresAgeCheck: true
       },
       {
@@ -65,9 +109,12 @@ async function main() {
         category: 'Abarrotes',
         brand: 'Cocina Plus',
         price: 3390,
+        offerPrice: 2890,
+        offerEnabled: false,
         stock: 42,
         lowStockThreshold: 10,
-        imageUrl: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=800&q=80',
+        imageUrl:
+          'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=800&q=80',
         requiresAgeCheck: false
       },
       {
@@ -77,9 +124,12 @@ async function main() {
         category: 'Abarrotes',
         brand: 'Campos del Sur',
         price: 1890,
+        offerPrice: 1590,
+        offerEnabled: true,
         stock: 50,
         lowStockThreshold: 10,
-        imageUrl: 'https://images.unsplash.com/photo-1586201375761-83865001e31b?auto=format&fit=crop&w=800&q=80',
+        imageUrl:
+          'https://images.unsplash.com/photo-1586201375761-83865001e31b?auto=format&fit=crop&w=800&q=80',
         requiresAgeCheck: false
       },
       {
@@ -89,9 +139,27 @@ async function main() {
         category: 'Abarrotes',
         brand: 'Trigo de Oro',
         price: 990,
+        offerPrice: 790,
+        offerEnabled: true,
         stock: 70,
         lowStockThreshold: 12,
-        imageUrl: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=800&q=80',
+        imageUrl:
+          'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=800&q=80',
+        requiresAgeCheck: false
+      },
+      {
+        name: 'Azúcar Granulada 1Kg',
+        slug: 'azucar-granulada-1kg',
+        description: 'Azúcar granulada para cocina y repostería.',
+        category: 'Abarrotes',
+        brand: 'Dulce Hogar',
+        price: 1490,
+        offerPrice: null,
+        offerEnabled: false,
+        stock: 36,
+        lowStockThreshold: 8,
+        imageUrl:
+          'https://images.unsplash.com/photo-1581441363689-1f3c3c414635?auto=format&fit=crop&w=800&q=80',
         requiresAgeCheck: false
       }
     ]
@@ -110,29 +178,46 @@ async function main() {
     });
   }
 
+  const whisky = allProducts.find((p) => p.slug === 'whisky-black-reserve-750cc');
+  const aceite = allProducts.find((p) => p.slug === 'aceite-maravilla-1l');
+  const arroz = allProducts.find((p) => p.slug === 'arroz-grado-2-1kg');
+
+  if (!whisky || !aceite || !arroz) {
+    throw new Error('No se encontraron productos necesarios para crear la orden demo.');
+  }
+
+  const whiskyPrice = getEffectivePrice(whisky);
+  const aceitePrice = getEffectivePrice(aceite);
+  const arrozPrice = getEffectivePrice(arroz);
+
+  const sampleOrderTotal = whiskyPrice * 1 + aceitePrice * 1 + arrozPrice * 3;
+
   const sampleOrder = await prisma.order.create({
     data: {
       code: 'ORD-DEMO-1001',
       userId: customer.id,
-      total: 33980,
+      total: sampleOrderTotal,
       shippingAddress: 'Av. Siempre Viva 123, Temuco',
       status: OrderStatus.PAID,
       items: {
         create: [
           {
-            productId: allProducts[0].id,
+            productId: whisky.id,
             quantity: 1,
-            unitPrice: allProducts[0].price
+            unitPrice: whiskyPrice,
+            originalPrice: whisky.price
           },
           {
-            productId: allProducts[2].id,
+            productId: aceite.id,
             quantity: 1,
-            unitPrice: allProducts[2].price
+            unitPrice: aceitePrice,
+            originalPrice: aceite.price
           },
           {
-            productId: allProducts[3].id,
+            productId: arroz.id,
             quantity: 3,
-            unitPrice: allProducts[3].price
+            unitPrice: arrozPrice,
+            originalPrice: arroz.price
           }
         ]
       }

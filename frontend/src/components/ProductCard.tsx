@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import LocalBarIcon from '@mui/icons-material/LocalBar';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
+import SellIcon from '@mui/icons-material/Sell';
 import type { Product } from '../types';
 
 interface Props {
@@ -17,32 +18,123 @@ interface Props {
   onAdd: (product: Product) => void;
 }
 
-export function ProductCard({ product, onAdd }: Props) {
+function hasValidOffer(product: Product) {
   return (
-    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    !!product.offerEnabled &&
+    !!product.offerPrice &&
+    product.offerPrice > 0 &&
+    product.offerPrice < product.price
+  );
+}
+
+function getDiscountPercentage(price: number, offerPrice: number) {
+  return Math.round(((price - offerPrice) / price) * 100);
+}
+
+function getSavings(price: number, offerPrice: number) {
+  return price - offerPrice;
+}
+
+export function ProductCard({ product, onAdd }: Props) {
+  const hasOffer = hasValidOffer(product);
+  const discountPercentage = hasOffer ? getDiscountPercentage(product.price, product.offerPrice!) : 0;
+  const savings = hasOffer ? getSavings(product.price, product.offerPrice!) : 0;
+
+  return (
+    <Card
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        '&:hover': {
+          transform: 'translateY(-4px)'
+        }
+      }}
+    >
       <CardMedia
         component="img"
         height="220"
         image={product.imageUrl || 'https://via.placeholder.com/800x600?text=Producto'}
         alt={product.name}
       />
+
       <CardContent sx={{ flexGrow: 1 }}>
-        <Stack direction="row" spacing={1} mb={1} flexWrap="wrap" useFlexGap>
+        <Stack direction="row" spacing={1} mb={1.2} flexWrap="wrap" useFlexGap>
           <Chip label={product.category} size="small" color="primary" variant="outlined" />
+
           {product.requiresAgeCheck && (
             <Chip icon={<LocalBarIcon />} label="+18" size="small" color="secondary" />
           )}
+
+          {hasOffer && (
+            <Chip
+              icon={<SellIcon />}
+              label={`-${discountPercentage}%`}
+              size="small"
+              color="error"
+            />
+          )}
         </Stack>
-        <Typography variant="h6" gutterBottom>
+
+        <Typography
+          variant="h6"
+          gutterBottom
+          sx={{
+            lineHeight: 1.2,
+            minHeight: 58
+          }}
+        >
           {product.name}
         </Typography>
-        <Typography variant="body2" color="text.secondary" mb={2}>
+
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          mb={2}
+          sx={{
+            minHeight: 42
+          }}
+        >
           {product.description}
         </Typography>
+
+        <Stack spacing={0.6} mb={1.5}>
+          {hasOffer ? (
+            <>
+              <Stack direction="row" spacing={1.2} alignItems="center" flexWrap="wrap" useFlexGap>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    textDecoration: 'line-through',
+                    color: 'text.secondary'
+                  }}
+                >
+                  ${product.price.toLocaleString('es-CL')}
+                </Typography>
+
+                <Typography
+                  variant="h5"
+                  color="error.main"
+                  fontWeight={800}
+                >
+                  ${product.offerPrice!.toLocaleString('es-CL')}
+                </Typography>
+              </Stack>
+
+              <Typography variant="body2" color="success.main" fontWeight={700}>
+                Ahorras ${savings.toLocaleString('es-CL')}
+              </Typography>
+            </>
+          ) : (
+            <Typography variant="h5" color="primary.main" fontWeight={800}>
+              ${product.price.toLocaleString('es-CL')}
+            </Typography>
+          )}
+        </Stack>
+
         <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6" color="primary.main" fontWeight={800}>
-            ${product.price.toLocaleString('es-CL')}
-          </Typography>
           <Chip
             icon={<Inventory2Icon />}
             label={`Stock: ${product.stock}`}
@@ -51,6 +143,7 @@ export function ProductCard({ product, onAdd }: Props) {
           />
         </Stack>
       </CardContent>
+
       <CardActions sx={{ p: 2, pt: 0 }}>
         <Button
           variant="contained"

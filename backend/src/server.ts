@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import path from 'node:path';
 import authRoutes from './routes/auth.js';
 import productRoutes from './routes/products.js';
 import orderRoutes from './routes/orders.js';
@@ -15,6 +16,8 @@ app.use(cors({ origin: frontendUrl }));
 app.use(express.json());
 app.use(morgan('dev'));
 
+app.use('/uploads', express.static(path.resolve('uploads')));
+
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, message: 'API operativa.' });
 });
@@ -26,7 +29,12 @@ app.use('/api/admin', adminRoutes);
 
 app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(error);
-  res.status(500).json({ message: 'Ocurrió un error interno en el servidor.' });
+
+  if (error instanceof Error) {
+    return res.status(500).json({ message: error.message });
+  }
+
+  return res.status(500).json({ message: 'Ocurrió un error interno en el servidor.' });
 });
 
 app.listen(port, () => {

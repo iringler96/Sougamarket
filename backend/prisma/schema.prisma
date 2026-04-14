@@ -52,6 +52,8 @@ model Product {
   category           String
   brand              String?
   price              Float
+  offerPrice         Float?
+  offerEnabled       Boolean             @default(false)
   stock              Int                 @default(0)
   lowStockThreshold  Int                 @default(5)
   imageUrl           String?
@@ -77,13 +79,14 @@ model Order {
 }
 
 model OrderItem {
-  id        Int     @id @default(autoincrement())
-  quantity  Int
-  unitPrice Float
-  productId Int
-  orderId   Int
-  product   Product @relation(fields: [productId], references: [id])
-  order     Order   @relation(fields: [orderId], references: [id])
+  id            Int     @id @default(autoincrement())
+  quantity      Int
+  unitPrice     Float
+  originalPrice Float?
+  productId     Int
+  orderId       Int
+  product       Product @relation(fields: [productId], references: [id])
+  order         Order   @relation(fields: [orderId], references: [id])
 }
 
 model InventoryMovement {

@@ -8,13 +8,32 @@ const router = Router();
 
 const createOrderSchema = z.object({
   shippingAddress: z.string().min(5, 'La dirección es obligatoria.'),
-  items: z.array(
-    z.object({
-      productId: z.number().int().positive(),
-      quantity: z.number().int().positive()
-    })
-  ).min(1, 'Debes agregar al menos un producto.')
+  items: z
+    .array(
+      z.object({
+        productId: z.number().int().positive(),
+        quantity: z.number().int().positive()
+      })
+    )
+    .min(1, 'Debes agregar al menos un producto.')
 });
+
+function getEffectivePrice(product: {
+  price: number;
+  offerPrice?: number | null;
+  offerEnabled?: boolean;
+}) {
+  if (
+    product.offerEnabled &&
+    product.offerPrice &&
+    product.offerPrice > 0 &&
+    product.offerPrice < product.price
+  ) {
+    return product.offerPrice;
+  }
+
+  return product.price;
+}
 
 router.use(authenticate);
 
@@ -41,7 +60,10 @@ router.post('/', async (req, res) => {
 
   const { items, shippingAddress } = parsed.data;
   const productIds = items.map((item) => item.productId);
-  const products = await prisma.product.findMany({ where: { id: { in: productIds }, active: true } });
+
+  const products = await prisma.product.findMany({
+    where: { id: { in: productIds }, active: true }
+  });
 
   if (products.length !== productIds.length) {
     return res.status(400).json({ message: 'Uno o más productos ya no están disponibles.' });
@@ -49,6 +71,7 @@ router.post('/', async (req, res) => {
 
   for (const item of items) {
     const product = products.find((entry) => entry.id === item.productId)!;
+
     if (product.stock < item.quantity) {
       return res.status(400).json({ message: `Stock insuficiente para ${product.name}.` });
     }
@@ -56,7 +79,7 @@ router.post('/', async (req, res) => {
 
   const total = items.reduce((acc, item) => {
     const product = products.find((entry) => entry.id === item.productId)!;
-    return acc + product.price * item.quantity;
+    return acc + getEffectivePrice(product) * item.quantity;
   }, 0);
 
   const code = `ORD-${Date.now()}`;
@@ -72,10 +95,12 @@ router.post('/', async (req, res) => {
         items: {
           create: items.map((item) => {
             const product = products.find((entry) => entry.id === item.productId)!;
+
             return {
               productId: item.productId,
               quantity: item.quantity,
-              unitPrice: product.price
+              unitPrice: getEffectivePrice(product),
+              originalPrice: product.price
             };
           })
         }

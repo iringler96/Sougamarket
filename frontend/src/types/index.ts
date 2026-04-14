@@ -15,6 +15,8 @@ export interface Product {
   category: string;
   brand?: string | null;
   price: number;
+  offerPrice?: number | null;
+  offerEnabled: boolean;
   stock: number;
   lowStockThreshold: number;
   imageUrl?: string | null;
@@ -41,6 +43,7 @@ export interface OrderItem {
   id: number;
   quantity: number;
   unitPrice: number;
+  originalPrice?: number | null;
   product: Product;
 }
 
