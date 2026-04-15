@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Card,
   CardActions,
@@ -44,9 +45,11 @@ export function ProductCard({ product, onAdd }: Props) {
     <Card
       sx={{
         height: '100%',
+        minHeight: 520,
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
+        borderRadius: 1,
         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
         '&:hover': {
           transform: 'translateY(-4px)'
@@ -55,13 +58,32 @@ export function ProductCard({ product, onAdd }: Props) {
     >
       <CardMedia
         component="img"
-        height="220"
         image={product.imageUrl || 'https://via.placeholder.com/800x600?text=Producto'}
         alt={product.name}
+        sx={{
+          height: 220,
+          width: '100%',
+          objectFit: 'cover',
+          flexShrink: 0
+        }}
       />
 
-      <CardContent sx={{ flexGrow: 1 }}>
-        <Stack direction="row" spacing={1} mb={1.2} flexWrap="wrap" useFlexGap>
+      <CardContent
+        sx={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          p: 2
+        }}
+      >
+        <Stack
+          direction="row"
+          spacing={1}
+          mb={1.2}
+          flexWrap="wrap"
+          useFlexGap
+          sx={{ minHeight: 32, alignContent: 'flex-start' }}
+        >
           <Chip label={product.category} size="small" color="primary" variant="outlined" />
 
           {product.requiresAgeCheck && (
@@ -83,7 +105,11 @@ export function ProductCard({ product, onAdd }: Props) {
           gutterBottom
           sx={{
             lineHeight: 1.2,
-            minHeight: 58
+            minHeight: 58,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden'
           }}
         >
           {product.name}
@@ -92,17 +118,21 @@ export function ProductCard({ product, onAdd }: Props) {
         <Typography
           variant="body2"
           color="text.secondary"
-          mb={2}
           sx={{
-            minHeight: 42
+            minHeight: 48,
+            mb: 2,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden'
           }}
         >
           {product.description}
         </Typography>
 
-        <Stack spacing={0.6} mb={1.5}>
+        <Box sx={{ minHeight: 62, mb: 1.5 }}>
           {hasOffer ? (
-            <>
+            <Stack spacing={0.6}>
               <Stack direction="row" spacing={1.2} alignItems="center" flexWrap="wrap" useFlexGap>
                 <Typography
                   variant="body1"
@@ -114,11 +144,7 @@ export function ProductCard({ product, onAdd }: Props) {
                   ${product.price.toLocaleString('es-CL')}
                 </Typography>
 
-                <Typography
-                  variant="h5"
-                  color="error.main"
-                  fontWeight={800}
-                >
+                <Typography variant="h5" color="error.main" fontWeight={800}>
                   ${product.offerPrice!.toLocaleString('es-CL')}
                 </Typography>
               </Stack>
@@ -126,15 +152,15 @@ export function ProductCard({ product, onAdd }: Props) {
               <Typography variant="body2" color="success.main" fontWeight={700}>
                 Ahorras ${savings.toLocaleString('es-CL')}
               </Typography>
-            </>
+            </Stack>
           ) : (
             <Typography variant="h5" color="primary.main" fontWeight={800}>
               ${product.price.toLocaleString('es-CL')}
             </Typography>
           )}
-        </Stack>
+        </Box>
 
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 'auto' }}>
           <Chip
             icon={<Inventory2Icon />}
             label={`Stock: ${product.stock}`}

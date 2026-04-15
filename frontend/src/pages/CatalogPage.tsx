@@ -2,8 +2,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import {
   Alert,
+  Box,
   CircularProgress,
-  Grid,
   InputAdornment,
   MenuItem,
   Paper,
@@ -96,7 +96,7 @@ export function CatalogPage() {
         </Alert>
       )}
 
-      <Paper sx={{ p: 2.5, borderRadius: 4 }}>
+      <Paper sx={{ p: 2.5, borderRadius: 1 }}>
         <Stack spacing={2}>
           <Stack
             direction={{ xs: 'column', md: 'row' }}
@@ -119,40 +119,45 @@ export function CatalogPage() {
             </Stack>
           </Stack>
 
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={8}>
-              <TextField
-                fullWidth
-                placeholder="Buscar por nombre, marca o categoría"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  )
-                }}
-              />
-            </Grid>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                md: '2fr 1fr'
+              },
+              gap: 2
+            }}
+          >
+            <TextField
+              fullWidth
+              placeholder="Buscar por nombre, marca o categoría"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                )
+              }}
+            />
 
-            <Grid item xs={12} md={4}>
-              <TextField
-                select
-                fullWidth
-                label="Categoría"
-                value={category}
-                onChange={(event) => setCategory(event.target.value)}
-              >
-                <MenuItem value="">Todas</MenuItem>
-                {categories.map((item) => (
-                  <MenuItem key={item} value={item}>
-                    {item}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-          </Grid>
+            <TextField
+              select
+              fullWidth
+              label="Categoría"
+              value={category}
+              onChange={(event) => setCategory(event.target.value)}
+            >
+              <MenuItem value="">Todas</MenuItem>
+              {categories.map((item) => (
+                <MenuItem key={item} value={item}>
+                  {item}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Box>
         </Stack>
       </Paper>
 
@@ -166,9 +171,20 @@ export function CatalogPage() {
           </Stack>
         </Paper>
       ) : (
-        <Grid container spacing={3}>
+        <Box
+          sx={{
+            width: '100%',
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(3, minmax(0, 1fr))'
+            },
+            gap: 3,
+            alignItems: 'stretch'
+          }}
+        >
           {filteredProducts.map((product) => (
-            <Grid item xs={12} sm={6} lg={4} key={product.id}>
+            <Box key={product.id} sx={{ height: '100%', minWidth: 0 }}>
               <ProductCard
                 product={product}
                 onAdd={(selected) => {
@@ -176,9 +192,9 @@ export function CatalogPage() {
                   setMessage(`${selected.name} se agregó al carrito.`);
                 }}
               />
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
       )}
     </Stack>
   );
