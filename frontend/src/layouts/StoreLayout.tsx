@@ -28,7 +28,7 @@ export function StoreLayout() {
             <Stack direction="row" spacing={1.5} alignItems="center">
               <StorefrontIcon color="primary" />
               <Typography variant="h6" fontWeight={800}>
-                SOUGAMARKET
+                SOUGAMARK
               </Typography>
             </Stack>
 

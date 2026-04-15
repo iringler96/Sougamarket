@@ -10,15 +10,24 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
-import type { Order } from '../types';
+import type { Order, OrderStatus } from '../types';
 
-const statusMap: Record<string, 'default' | 'info' | 'success' | 'warning' | 'error'> = {
+const statusColorMap: Record<OrderStatus, 'default' | 'info' | 'success' | 'warning' | 'error'> = {
   PENDING_PAYMENT: 'warning',
   PAID: 'info',
   PREPARING: 'warning',
   SHIPPED: 'info',
   DELIVERED: 'success',
   CANCELLED: 'error'
+};
+
+const STATUS_LABELS: Record<OrderStatus, string> = {
+  PENDING_PAYMENT: 'Pendiente de pago',
+  PAID: 'Pagado',
+  PREPARING: 'En preparación',
+  SHIPPED: 'Enviado',
+  DELIVERED: 'Entregado',
+  CANCELLED: 'Cancelado'
 };
 
 function hasDiscount(normalPrice: number, paidPrice: number) {
@@ -71,7 +80,10 @@ export function OrdersPage() {
                   </Typography>
                 </Stack>
 
-                <Chip label={order.status} color={statusMap[order.status]} />
+                <Chip
+                  label={STATUS_LABELS[order.status] ?? order.status}
+                  color={statusColorMap[order.status]}
+                />
               </Stack>
 
               <Divider />

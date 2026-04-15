@@ -17,6 +17,15 @@ import type { Order, OrderStatus } from '../types';
 
 const statuses: OrderStatus[] = ['PAID', 'PREPARING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
+const STATUS_LABELS: Record<OrderStatus, string> = {
+  PENDING_PAYMENT: 'Pendiente de pago',
+  PAID: 'Pagado',
+  PREPARING: 'En preparación',
+  SHIPPED: 'Enviado',
+  DELIVERED: 'Entregado',
+  CANCELLED: 'Cancelado'
+};
+
 export function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
 
@@ -38,7 +47,9 @@ export function AdminOrdersPage() {
     <Stack spacing={3}>
       <Stack>
         <Typography variant="h3">Órdenes</Typography>
-        <Typography color="text.secondary">Revisa compras, cliente, total y cambia el estado de despacho.</Typography>
+        <Typography color="text.secondary">
+          Revisa compras, cliente, total y cambia el estado de despacho.
+        </Typography>
       </Stack>
 
       <Card>
@@ -54,18 +65,25 @@ export function AdminOrdersPage() {
                 <TableCell>Detalle</TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
               {orders.map((order) => (
                 <TableRow key={order.id} hover>
                   <TableCell>{order.code}</TableCell>
+
                   <TableCell>
                     <Stack>
                       <Typography fontWeight={700}>{order.user?.name}</Typography>
-                      <Typography variant="body2" color="text.secondary">{order.user?.email}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {order.user?.email}
+                      </Typography>
                     </Stack>
                   </TableCell>
+
                   <TableCell>{new Date(order.createdAt).toLocaleString('es-CL')}</TableCell>
+
                   <TableCell>${order.total.toLocaleString('es-CL')}</TableCell>
+
                   <TableCell>
                     <TextField
                       select
@@ -75,11 +93,12 @@ export function AdminOrdersPage() {
                     >
                       {statuses.map((status) => (
                         <MenuItem key={status} value={status}>
-                          {status}
+                          {STATUS_LABELS[status]}
                         </MenuItem>
                       ))}
                     </TextField>
                   </TableCell>
+
                   <TableCell>
                     {order.items.map((item) => `${item.product.name} x${item.quantity}`).join(', ')}
                   </TableCell>

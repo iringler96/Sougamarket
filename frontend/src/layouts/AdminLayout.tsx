@@ -1,6 +1,7 @@
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import ImageIcon from '@mui/icons-material/Image';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Box, Button, Container, Paper, Stack, Typography } from '@mui/material';
 import { Link as RouterLink, Outlet, useLocation } from 'react-router-dom';
@@ -11,6 +12,7 @@ export function AdminLayout() {
   const links = [
     { label: 'Dashboard', to: '/admin', icon: <DashboardIcon /> },
     { label: 'Productos', to: '/admin/productos', icon: <InventoryIcon /> },
+    { label: 'Carrusel', to: '/admin/carrusel', icon: <ImageIcon /> },
     { label: 'Órdenes', to: '/admin/ordenes', icon: <ReceiptLongIcon /> }
   ];
 
@@ -21,10 +23,12 @@ export function AdminLayout() {
           <Typography variant="h6" fontWeight={800} mb={2}>
             Panel administrador
           </Typography>
+
           <Stack spacing={1.5}>
             <Button component={RouterLink} to="/" startIcon={<ArrowBackIcon />} variant="text">
               Volver a tienda
             </Button>
+
             {links.map((item) => (
               <Button
                 key={item.to}

@@ -5,6 +5,7 @@ import { StoreLayout } from './layouts/StoreLayout';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { AdminOrdersPage } from './pages/AdminOrdersPage';
 import { AdminProductsPage } from './pages/AdminProductsPage';
+import { AdminCarouselPage } from './pages/AdminCarouselPage';
 import { CartPage } from './pages/CartPage';
 import { CatalogPage } from './pages/CatalogPage';
 import { HomePage } from './pages/HomePage';
@@ -41,6 +42,7 @@ export default function App() {
       >
         <Route index element={<AdminDashboardPage />} />
         <Route path="productos" element={<AdminProductsPage />} />
+        <Route path="carrusel" element={<AdminCarouselPage />} />
         <Route path="ordenes" element={<AdminOrdersPage />} />
       </Route>
 

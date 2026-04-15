@@ -107,3 +107,14 @@ model Notification {
   type      NotificationType
   createdAt DateTime         @default(now())
 }
+
+model HomeCarouselSlide {
+  id        Int      @id @default(autoincrement())
+  title     String?
+  subtitle  String?
+  imageUrl  String
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

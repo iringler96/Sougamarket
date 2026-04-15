@@ -82,3 +82,14 @@ export interface DashboardData {
   recentOrders: Order[];
   notifications: NotificationItem[];
 }
+
+export interface HomeCarouselSlide {
+  id: number;
+  title?: string | null;
+  subtitle?: string | null;
+  imageUrl: string;
+  active: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
